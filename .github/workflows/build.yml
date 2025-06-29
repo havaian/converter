@@ -1,0 +1,74 @@
+name: Build Application
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+      - name: Build Windows executable
+        run: |
+          pyinstaller --name=universal-converter --windowed --icon=resources/icons/app_icon.ico --add-data="resources;resources" --add-data="portable_tools;portable_tools" src/main_gui.py
+      - name: Upload Windows Build
+        uses: actions/upload-artifact@v2
+        with:
+          name: Windows-Build
+          path: dist/universal-converter/
+          
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+      - name: Build macOS executable
+        run: |
+          pyinstaller --name=universal-converter --windowed --icon=resources/icons/app_icon.icns --add-data="resources:resources" --add-data="portable_tools:portable_tools" src/main_gui.py
+      - name: Upload macOS Build
+        uses: actions/upload-artifact@v2
+        with:
+          name: MacOS-Build
+          path: dist/universal-converter/
+          
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -r requirements.txt
+          sudo apt-get update
+          sudo apt-get install -y python3-pyqt6
+      - name: Build Linux executable
+        run: |
+          pyinstaller --name=universal-converter --windowed --add-data="resources:resources" --add-data="portable_tools:portable_tools" src/main_gui.py
+      - name: Upload Linux Build
+        uses: actions/upload-artifact@v2
+        with:
+          name: Linux-Build
+          path: dist/universal-converter/
